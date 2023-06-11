@@ -50,7 +50,8 @@ paxminer/qsignups database, the hostname, username, and database name will need 
 values.  If you're using the hosted versions by Beaker and Moneyball, the values are already set
 correctly.
 
-```% ./deploy.sh
+```
+% ./deploy.sh
 
 Successfully packaged artifacts and wrote output template to file .out.yml.
 Execute the following command to deploy the packaged template
@@ -66,7 +67,8 @@ The lambda function retrieves the database password from the Systems Manager Par
 Before invoking the function, add the password (if you don't have the password for the read only
 paxminer account, contact Beaker on F3 Nation Slack.)
 
-``` % aws ssm put-parameter --type SecureString --name /qsignup_report/dbPassword --value <password>
+```
+% aws ssm put-parameter --type SecureString --name /qsignup_report/dbPassword --value <password>
 {
     "Version": 1,
     "Tier": "Standard"
