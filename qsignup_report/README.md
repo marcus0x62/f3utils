@@ -28,9 +28,7 @@ mysql> SELECT ao_display_name, ao_location_subtitle, team_id FROM qsignups_aos W
 +------------------+--------------------------------------------------------+-------------+
 | ao_display_name  | ao_location_subtitle                                   | team_id     |
 +------------------+--------------------------------------------------------+-------------+
-| The Battleground | One Franklin Park
-6100 Tower Circle
-Franklin, TN 37067 | T3SACDW4S   |
+| The Battleground | One Franklin Park 6100 Tower Circle Franklin, TN 37067 | T3SACDW4S   |
 | The Battleground | Oakville Middle School                                 | T0114FM4E9W |
 +------------------+--------------------------------------------------------+-------------+
 2 rows in set (0.06 sec)
@@ -39,8 +37,8 @@ mysql>
 
 ```
 
- *note that AO names can be duplicated -- be sure the description in the ao_location_subtitle column
- makes sense.*
+**note that another region might also use your AO name -- be sure the description in the
+ao_location_subtitle column makes sense.**
 
 Take the value from the team_id column and update the team_id variable in
 [report](html/qsignup_report.html).  It is located near the top of the file:
@@ -51,5 +49,7 @@ Take the value from the team_id column and update the team_id variable in
     <title>QSignups Report</title>
     <script language="JavaScript">
       var create_ao_list = true;
-      *var team_id = 'T3SACDW4S';* // You need to query this from the Paxminer database.
+      var team_id = 'T3SACDW4S'; // You need to query this from the Paxminer database.
 ```
+
+After that, all you should have to do is copy the file to your web server and let your PAX know the URL.
