@@ -48,7 +48,8 @@ host your own copy for whatever reason, you'll need to run the [deployment scrip
 should also inspect the [Cloudformation Template](template.yml) -- if you are hosting your own
 paxminer/qsignups database, the hostname, username, and database name will need to be updated to your
 values.  If you're using the hosted versions by Beaker and Moneyball, the values are already set
-correctly.
+correctly.  This script assumes you already have the AWS CLI tools installed and configured and you have
+an AWS account.
 
 ```
 % ./deploy.sh
