@@ -10,7 +10,7 @@ and note the team_id column.  In the example below, I'm using our AO 'The Battle
 % mysql -u paxminer -p -h f3stlouis.cac36jsyb5ss.us-east-2.rds.amazonaws.com -D f3stcharles
 Enter password:
 
-[ output elided ]...
+Output elided...
 
 mysql> SELECT ao_display_name, ao_location_subtitle, team_id FROM qsignups_aos WHERE ao_display_name LIKE 'The Battleground';
 +------------------+--------------------------------------------------------+-------------+
