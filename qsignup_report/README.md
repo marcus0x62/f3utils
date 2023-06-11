@@ -9,20 +9,8 @@ and note the team_id column.  In the example below, I'm using our AO 'The Battle
 ```
 % mysql -u paxminer -p -h f3stlouis.cac36jsyb5ss.us-east-2.rds.amazonaws.com -D f3stcharles
 Enter password:
-Reading table information for completion of table and column names
-You can turn off this feature to get a quicker startup with -A
 
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 1522500
-Server version: 8.0.28 Source distribution
-
-Copyright (c) 2000, 2023, Oracle and/or its affiliates.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+[ output elided ]...
 
 mysql> SELECT ao_display_name, ao_location_subtitle, team_id FROM qsignups_aos WHERE ao_display_name LIKE 'The Battleground';
 +------------------+--------------------------------------------------------+-------------+
@@ -34,7 +22,6 @@ mysql> SELECT ao_display_name, ao_location_subtitle, team_id FROM qsignups_aos W
 2 rows in set (0.06 sec)
 
 mysql>
-
 ```
 
 **note that another region might also use your AO name -- be sure the description in the
