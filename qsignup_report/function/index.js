@@ -3,7 +3,7 @@
  * Created: Marcus Butler <marcusb@marcusb.org>, 10-June-2023.
  */
 
-let debug = true;
+let debug = false;
 
 exports.handler = async function(event, context) {
     const mysql = require('mysql2/promise');
@@ -13,7 +13,9 @@ exports.handler = async function(event, context) {
     let start_date = '';
     let stop_date = '';
     let now = new Date();
-    
+
+    debug = process.env.debug;
+
     log('## ENVIRONMENT VARIABLES: ' + serialize(process.env));
     log('## CONTEXT: ' + serialize(context));
     log('## EVENT: ' + serialize(event));
