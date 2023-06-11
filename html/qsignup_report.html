@@ -1,0 +1,189 @@
+<html>
+  <head>
+    <title>QSignups Report</title>
+    <script language="JavaScript">
+      var create_ao_list = true;
+      var team_id = 'T3SACDW4S'; // You need to query this from the Paxminer database.
+
+      function init() {
+          let now = new Date();
+          let start_month = document.querySelector('#start_month');
+          let start_day = document.querySelector('#start_day');
+          let start_year = document.querySelector('#start_year');
+
+          let stop_month = document.querySelector('#stop_month');
+          let stop_day = document.querySelector('#stop_day');
+          let stop_year = document.querySelector('#stop_year');
+
+          start_month.selectedIndex = now.getMonth();
+          start_day.value = now.getDate();
+
+          for (let i = now.getFullYear() - 1; i <= now.getFullYear() + 1; i++) {
+              let opt = document.createElement('option');
+              opt.text = `${i}`;
+              start_year.add(opt);
+          }
+
+          start_year.selectedIndex = 1;
+
+          stop_month.selectedIndex = now.getMonth() + 1;
+          stop_day.value = now.getDate();
+
+          for (let i = now.getFullYear() - 1; i <= now.getFullYear() + 1; i++) {
+              let opt = document.createElement('option');
+              opt.text = `${i}`;
+              stop_year.add(opt);
+          }
+
+          stop_year.selectedIndex = 1;
+
+          get_signups();
+      }
+
+      async function get_signups() {
+          let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov',
+                        'Dec'];
+
+          let status = document.querySelector('#data');
+          let ao_selector = document.querySelector('#ao_selector');
+
+          let start_month_selector = document.querySelector('#start_month');
+          let start_day_selector = document.querySelector('#start_day');
+          let start_year_selector = document.querySelector('#start_year');
+
+          let stop_month_selector = document.querySelector('#stop_month');
+          let stop_day_selector = document.querySelector('#stop_day');
+          let stop_year_selector = document.querySelector('#stop_year');
+
+          let start_date = `${start_year_selector.value}-${start_month_selector.selectedIndex + 1}-${start_day_selector.value}`;
+
+          let stop_date = `${stop_year_selector.value}-${stop_month_selector.selectedIndex + 1}-${stop_day_selector.value}`;
+          
+          let url = `https://f3.marcusb.org/?team_id=${team_id}&start_date=${start_date}&stop_date=${stop_date}`;
+
+          console.log(url);
+          let response = await fetch(url);
+          let body = await response.json();
+
+          let data = `<table><th style='color: white;'>Date</th><th style='color: white;'>AO</th><th style='color: white;'>Q</th><th style='color: white;'>Notes</th>`;
+
+          let odd = true;
+          let ao_list = [];
+
+          for (row of body) {
+              let ao = row['ao_display_name'];
+              let q  = row['q_pax_name'];
+              let t = new Date(row['event_date']);
+              let date = `${months[t.getUTCMonth()]} ${t.getUTCDate()}, ${t.getUTCFullYear()}`;
+              let special = row['event_special'];
+
+              if (create_ao_list == true) {
+                  if (ao_list.indexOf(ao) == -1) {
+                      ao_list = ao_list.concat(ao);
+                  }
+              }
+
+              if (ao_selector.value == 'All AOs' || ao == ao_selector.value) {
+                  let style = '';
+                  if (q == null) {
+                      q = 'OPEN!';
+                      style = 'font-weight: bold; color: red;';
+                  } else {
+                      style = 'font-weight: normal;';
+                  }
+                  if (odd == true) {
+                      style = style + 'background: #cccccc;';
+                      odd = false;
+                  } else {
+                      style = style + 'background: #ffffff;';
+                      odd = true;
+                  }
+
+                  if (special == null) { special = ''; }
+                  data = data + `<tr style="${style}"><td>${date}</td><td>${ao}</td><td>${q}</td><td>${special}</td></tr>`;
+              }
+          }
+
+          data = data + '</table>';
+          status.innerHTML = data;
+
+          if (create_ao_list == true) {
+              create_ao_list = false; // We only want to do this once.
+
+              for (ao of ao_list) {
+                  let opt = document.createElement('option');
+                  opt.text = `${ao}`;
+                  ao_selector.add(opt);
+              }
+          }
+      }
+    </script>
+  </head>
+  <body onLoad="init();" style='background: #000000;'>
+    <table>
+      <tr>
+        <td style='color: white;'>Filter by AO</td>
+        <td style='color: white;'>Start Date</td>
+        <td style='color: white;'>End Date</td>
+      </tr>
+      <tr>
+        <td>
+          <select id='ao_selector'>
+            <option>All AOs</option>
+          </select>
+        </td>
+        <td>
+          <select id='start_month'>
+            <option>January</option>
+            <option>February</option>
+            <option>March</option>
+            <option>April</option>
+            <option>May</option>
+            <option>June</option>
+            <option>July</option>
+            <option>August</option>
+            <option>September</option>
+            <option>October</option>
+            <option>November</option>
+            <option>December</option>
+          </select>
+
+          <input id='start_day' size=2>
+
+          <select id='start_year'>
+          </select>
+        </td>
+        <td>
+          <select id='stop_month'>
+      	    <option>January</option>
+      	    <option>February</option>
+            <option>March</option>
+            <option>April</option>
+	    <option>May</option>
+	    <option>June</option>
+	    <option>July</option>
+            <option>August</option>
+            <option>September</option>
+            <option>October</option>
+            <option>November</option>
+            <option>December</option>
+          </select>
+
+          <input id='stop_day' size=2>
+
+    	  <select id='stop_year'>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td colspan=3 align='center'>
+          <input type='button' onClick='get_signups();' value='Update'>
+        </td>
+      <tr>
+        <td colspan=3>
+          <div id="data">Not yet updated</div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+.bucket-name.txt
+.out.yml
+.function-name.txt
+.api-gw-endpoint.txt
+function/node_modules/**
+function/package-lock.json
+out.json
