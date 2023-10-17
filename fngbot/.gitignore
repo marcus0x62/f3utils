@@ -1,0 +1,7 @@
+mailchimp-api-calls.txt
+secrets.env
+.out.yml
+.api-gw-endpoint.txt
+.bucket-name.txt
+.function-name.txt
+view_submission_json.txt

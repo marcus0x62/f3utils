@@ -1,0 +1,121 @@
+{
+    "type": "view_submission",
+    "team": {
+        "id": "T4W26HAU9",
+        "domain": "marcus0x62"
+    },
+    "user": {
+        "id": "U4WL42U91",
+        "username": "marcusb",
+        "name": "marcusb",
+        "team_id": "T4W26HAU9"
+    },
+    "api_app_id": "A05HS3CM6R5",
+    "token": "RDhBgDFgfFgMLxm9apiOLqKo",
+    "trigger_id": "6046808394754.166074588961.3a5edb718860df9e2a3e00a8487dec86",
+    "view": {
+        "id": "V060Y81PJMD",
+        "team_id": "T4W26HAU9",
+        "type": "modal",
+        "blocks": [
+            {
+                "type": "input",
+                "block_id": "2qLGj",
+                "label": {
+                    "type": "plain_text",
+                    "text": "F3 Name",
+                    "emoji": false
+                },
+                "optional": false,
+                "dispatch_action": false,
+                "element": {
+                    "type": "plain_text_input",
+                    "dispatch_action_config": {
+                        "trigger_actions_on": [
+                            "on_enter_pressed"
+                        ]
+                    },
+                    "action_id": "bkJ35"
+                }
+            },
+            {
+                "type": "input",
+                "block_id": "xXi5e",
+                "label": {
+                    "type": "plain_text",
+                    "text": "Email Address",
+                    "emoji": false
+                },
+                "optional": false,
+                "dispatch_action": false,
+                "element": {
+                    "type": "email_text_input",
+                    "action_id": "VJJOn"
+                }
+            },
+            {
+                "type": "input",
+                "block_id": "6zm/U",
+                "label": {
+                    "type": "plain_text",
+                    "text": "Cell Phone",
+                    "emoji": false
+                },
+                "optional": false,
+                "dispatch_action": false,
+                "element": {
+                    "type": "number_input",
+                    "action_id": "number_input-action",
+                    "is_decimal_allowed": false
+                }
+            }
+        ],
+        "private_metadata": "",
+        "callback_id": "",
+        "state": {
+            "values": {
+                "2qLGj": {
+                    "bkJ35": {
+                        "type": "plain_text_input",
+                        "value": "test"
+                    }
+                },
+                "xXi5e": {
+                    "VJJOn": {
+                        "type": "email_text_input",
+                        "value": "test"
+                    }
+                },
+                "6zm/U": {
+                    "number_input-action": {
+                        "type": "number_input",
+                        "value": "1111111"
+                    }
+                }
+            }
+        },
+        "hash": "1697483165.I38FzHzw",
+        "title": {
+            "type": "plain_text",
+            "text": "FNG Bot",
+            "emoji": true
+        },
+        "clear_on_close": false,
+        "notify_on_close": false,
+        "close": null,
+        "submit": {
+            "type": "plain_text",
+            "text": "Invite!",
+            "emoji": true
+        },
+        "previous_view_id": null,
+        "root_view_id": "V060Y81PJMD",
+        "app_id": "A05HS3CM6R5",
+        "external_id": "",
+        "app_installed_team_id": "T4W26HAU9",
+        "bot_id": "B05J6H77UBV"
+    },
+    "response_urls": [],
+    "is_enterprise_install": false,
+    "enterprise": null
+}
