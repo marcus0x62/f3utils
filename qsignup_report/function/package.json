@@ -12,6 +12,6 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.350.0",
-    "mysql2": "^3.3.3"
+    "mysql2": "^3.3.4"
   }
 }

@@ -10,9 +10,12 @@ if [ ! -e .bucket-name.txt ]; then
 fi
 
 ARTIFACT_BUCKET=$(cat .bucket-name.txt)
+PASSWORD=$(cat .db-password.txt)
 
 aws cloudformation package --template-file template.yml --s3-bucket $ARTIFACT_BUCKET \
     --output-template-file .out.yml
+
+perl -spi -e "s/DB_PASSWORD/$PASSWORD/g" .out.yml
 
 aws cloudformation deploy --template-file .out.yml --stack-name nodejs-apig \
     --capabilities CAPABILITY_NAMED_IAM

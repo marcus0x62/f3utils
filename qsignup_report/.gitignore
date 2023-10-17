@@ -5,3 +5,4 @@
 function/node_modules/**
 function/package-lock.json
 out.json
+.db-password.txt

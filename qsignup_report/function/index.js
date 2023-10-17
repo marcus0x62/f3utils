@@ -7,7 +7,6 @@ let debug = false;
 
 exports.handler = async function(event, context) {
     const mysql = require('mysql2/promise');
-    const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm");
     
     let team_id = '';
     let start_date = '';
@@ -20,14 +19,7 @@ exports.handler = async function(event, context) {
     log('## CONTEXT: ' + serialize(context));
     log('## EVENT: ' + serialize(event));
 
-    let db_password = '';
-    const ssm_client = new SSMClient({region: 'us-east-2'});
-    const ssm_cmd = new GetParameterCommand({Name: "/qsignup_report/dbPassword", WithDecryption: true});
-    const ssm_res = await ssm_client.send(ssm_cmd);
-    if (ssm_res?.Parameter) {
-        db_password = ssm_res.Parameter.Value;
-        log('Successfully loaded DB password from SSM');
-    }
+    let db_password = process.env.dbPassword;
     
     try {
         const dbconn = await mysql.createConnection({

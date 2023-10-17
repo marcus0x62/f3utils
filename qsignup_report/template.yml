@@ -29,6 +29,7 @@ Resources:
           dbHost: f3stlouis.cac36jsyb5ss.us-east-2.rds.amazonaws.com
           dbDatabase: f3stcharles
           dbUsername: paxminer
+          dbPassword: DB_PASSWORD
           debug: false
       Events:
         getEndpoint:
