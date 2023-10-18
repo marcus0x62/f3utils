@@ -5,3 +5,4 @@ secrets.env
 .bucket-name.txt
 .function-name.txt
 view_submission_json.txt
+post.go

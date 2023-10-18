@@ -21,6 +21,8 @@ var client = lambda.New(session.New())
 var ENV_F3_REGION string
 var ENV_SLACK_API_KEY string
 var ENV_SLACK_INVITE_LINK string
+var ENV_SLACK_SIGNING_SECRET string
+var ENV_SLACK_CHANNEL_ID string
 var ENV_EMAIL_SENDER_ADDRESS string
 var ENV_MAILCHIMP_API_KEY string
 var ENV_MAILCHIMP_API_ENDPOINT string
@@ -83,6 +85,8 @@ func handleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (Re
 	ENV_F3_REGION = os.Getenv("f3_region")
 	ENV_SLACK_API_KEY = os.Getenv("slack_api_key")
 	ENV_SLACK_INVITE_LINK = os.Getenv("slack_invite_link")
+	ENV_SLACK_SIGNING_SECRET = os.Getenv("slack_signing_secret")
+	ENV_SLACK_CHANNEL_ID = os.Getenv("slack_channel_id")
 	ENV_EMAIL_SENDER_ADDRESS = os.Getenv("email_sender_address")
 	ENV_MAILCHIMP_API_KEY = os.Getenv("mailchimp_api_key")
 	ENV_MAILCHIMP_API_ENDPOINT = os.Getenv("mailchimp_api_endpoint")
@@ -92,11 +96,26 @@ func handleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (Re
 
 	args := parse_args(event.Body)
 
-	/* Slack uses the same URI to request the modal display and to return the submitted data, so
-	 * we need to use other aspects of the payload to differentiate between the two calls...
-	 * A request for the modal display will contain a trigger_id field in the POST data, but no
-	 * payload field.
-	 * A call with user-submitted data will have both a trigger_id and a payload field present.
+	/* Each Slack message contains a HMAC-SHA 256 signature. */
+	if validate_signature(event.Body, event.Headers["X-Slack-Signature"],
+		event.Headers["X-Slack-Request-Timestamp"]) == false {
+		LogPrint("INVALID Slack Message Signature", LogLevelInfo)
+		return Response{}, nil
+	}
+
+	/* Slack uses the same URI for all app actions, so we need to use request fields to distinguish
+	 * between different calls.  There are currently three inbound requests we handle:
+	 * we need to use other aspects of the payload to differentiate between three calls...
+	 *
+	 * 1 - A request made via a slash action for the modal dialog will contain a trigger_id field in
+	 * the POST data, but no payload field.
+	 *
+	 * 2 - A request made via a button on the app home page to launch the modal dialog will contain
+	 * a payload field; the type will be set to block_actions and the trigger_id will be in the
+	 * JSON payload.
+	 *
+	 * 3 - A request with user-submitted form data will have a payload field, which will contain
+	 * the form data.
 	 */
 	if len(args["payload"]) > 0 {
 		var payload_args map[string]any
@@ -106,11 +125,20 @@ func handleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (Re
 		if payload_args["type"] == "view_submission" {
 			LogPrint("Handling view_submission...", LogLevelDebug)
 			return view_submission(ctx, event)
+		} else if payload_args["type"] == "block_actions" {
+			trigger_id, ok := payload_args["trigger_id"].(string)
+
+			if ok == false {
+				LogPrint("trigger_id in payload is not a string!", LogLevelDebug)
+				return Response{}, nil
+			}
+			LogPrint("Handling Modal Display call...", LogLevelDebug)
+			return view_display(trigger_id)
 		}
 		return Response{}, nil
 	} else if len(args["trigger_id"]) > 0 {
 		LogPrint("Handling Modal Display call...", LogLevelDebug)
-		return view_display(ctx, event)
+		return view_display(args["trigger_id"])
 	} else {
 		LogPrint("Received unknown request...", LogLevelDebug)
 		LogPrint(args["type"], LogLevelDebug)

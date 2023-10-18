@@ -31,15 +31,17 @@ Resources:
           debug: debug
           f3_region: F3 Franklin
           slack_api_key: SLACK_API_KEY
-          slack_invite_link: https://join.slack.com/t/marcus0x62/shared_invite/zt-256hszas2-Iz2ldbB1Uk406rytD4kjOw
+          slack_signing_secret: SLACK_SIGNING_SECRET
+          slack_invite_link: https://join.slack.com/t/f3franklin/shared_invite/zt-25a874zwl-CNiuBDuIP5UOOt1pZE7tSA
+          slack_channel_id: C061TKYJ2N8
           email_sender_address: f3franklintn@gmail.com
           mailchimp_api_key: MAILCHIMP_API_KEY
           mailchimp_api_endpoint: us7.api.mailchimp.com
           mailchimp_list_id: 0e9e9b3490
       Events:
-        getEndpoint:
+        postEndpoint:
           Type: Api
           Properties:
             RestApiId: !Ref api
             Path: /
-            Method: GET
+            Method: POST

@@ -18,6 +18,7 @@ aws cloudformation package --template-file template.yml --s3-bucket $ARTIFACT_BU
 
 perl -spi -e "s/SLACK_API_KEY/$SLACK_API_KEY/g" .out.yml
 perl -spi -e "s/MAILCHIMP_API_KEY/$MAILCHIMP_API_KEY/g" .out.yml
+perl -spi -e "s/SLACK_SIGNING_SECRET/$SLACK_SIGNING_SECRET/g" .out.yml
 
 aws cloudformation deploy --template-file .out.yml --stack-name fngbot \
     --capabilities CAPABILITY_NAMED_IAM
