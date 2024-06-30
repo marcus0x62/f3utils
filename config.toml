@@ -1,0 +1,26 @@
+bind_address = "127.0.0.1"
+bind_port    = 3002
+
+f3_region = "Your F3 Region Name"
+
+email_sender_address   = "fngbot@example.com"
+email_reply_to_address = "f3region@example.com" # Set this if you want the welcome emails to have a different reply-to address
+email_smtp_host        = 127.0.0.1
+#email_smtp_user = "foo"
+#email_smtp_password = "bar"
+
+# These should be set to the Paxminer/Qsignups database host; a read-only username is preferred as this code performs no database writes.
+mysql_hostname = "" # This should be set to the Paxminer/Qsignups database host
+mysql_port     = 3306
+mysql_username = ""
+mysql_password = ""
+mysql_database = ""
+
+mailchimp_api_endpoint = ""
+mailchimp_api_key      = ""
+mailchimp_list_id      = ""
+
+slack_api_key        = ""
+slack_channel_id     = ""
+slack_signing_secret = ""
+slack_invite_link    = ""
