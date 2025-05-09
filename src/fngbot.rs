@@ -86,7 +86,10 @@ struct FngbotSlackStateJSON {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct FngbotSlackStateValueJSON {
-    value: String,
+    #[serde(rename = "type")]
+    value_type: Option<String>,
+    value: Option<String>,
+    selected_user: Option<String>,
 }
 
 enum MailChimpStatus {
@@ -158,12 +161,20 @@ async fn fngbot_service(
             debug!("Parsed json... {json:?}");
             if json.payload_type == Some(String::from("block_actions")) {
                 if let Some(trigger) = json.trigger_id {
+                    debug!("Send view modal for block action invocation {trigger}");
                     return fngbot_display(&state, trigger.to_string()).await;
                 }
             } else if json.payload_type == Some(String::from("view_submission")) {
+                debug!("Received view submission: {json:?}");
                 return fngbot_view_submission(state, json).await;
+            } else {
+                debug!("Unknown request: {json:?}");
             }
+        } else if let Err(e) = serde_json::from_str::<FngbotSlackJSON>(payload) {
+            debug!("Failed to parse JSON: {payload:?}: {e:?}");
         }
+    } else {
+        debug!("Unknown request: {data:?}");
     }
     Err(error::ErrorBadRequest("Unknown Request"))
 }
@@ -235,6 +246,40 @@ async fn fngbot_display(
                      "text": "Cell Phone",
                      "emoji": false
                    }}
+                 }},
+                 {{
+                   "type": "input",
+                   "element": {{
+                     "type": "users_select",
+                     "placeholder": {{
+                       "type": "plain_text",
+                       "text": "Select an EH",
+                       "emoji": true
+                     }}
+                   }},
+                   "label": {{
+                     "type": "plain_text",
+                     "text": "EH (Optional)",
+                     "emoji": false
+                   }},
+                   "optional": true
+                 }},
+                 {{
+                   "type": "input",
+                   "element": {{
+                     "type": "users_select",
+                     "placeholder": {{
+                       "type": "plain_text",
+                       "text": "Select a Wingman",
+                       "emoji": true
+                     }}
+                   }},
+                   "label": {{
+                     "type": "plain_text",
+                     "text": "Wingman (Optional)",
+                     "emoji": false
+                   }},
+                   "optional": true
                  }}
                ]
              }}
@@ -275,6 +320,7 @@ async fn fngbot_view_submission(
     state: web::Data<crate::AppState>,
     json: FngbotSlackJSON,
 ) -> Result<HttpResponse, Error> {
+    debug!("Received view submission: {json:?}");
     let f3_name: String = if let Some(f3name) = get_slack_field(&json, "F3 Name") {
         f3name
     } else {
@@ -304,7 +350,10 @@ async fn fngbot_view_submission(
         return Err(error::ErrorBadRequest("Cell number not provided"));
     };
 
-    debug!("User input field values: {f3_name:?} {hospital_name:?} {email:?} {cell:?}");
+    let eh: String = get_slack_field(&json, "EH (Optional)").unwrap_or_default();
+    let wingman: String = get_slack_field(&json, "Wingman (Optional)").unwrap_or_default();
+
+    debug!("User input field values: {f3_name:?} {hospital_name:?} {email:?} {cell:?} {eh:?} {wingman:?}");
 
     // Add the user to Mailchimp
     let mailchimp_status = match mailchimp(&state, &f3_name, &hospital_name, &email, &cell).await {
@@ -325,6 +374,8 @@ async fn fngbot_view_submission(
         &hospital_name,
         &email,
         &cell,
+        &eh,
+        &wingman,
         slack_invite_status,
         mailchimp_status,
     )
@@ -423,7 +474,12 @@ fn get_slack_field(json: &FngbotSlackJSON, field: &str) -> Option<String> {
                         if let Some(state) = &view.state {
                             if let Some(block_id) = state.values.get(&block_id[..]) {
                                 if let Some(action_id) = block_id.get(&action_id[..]) {
-                                    return Some(action_id.value.clone());
+                                    // Handle both regular text inputs and users_select
+                                    if let Some(selected_user) = &action_id.selected_user {
+                                        return Some(selected_user.clone());
+                                    } else if let Some(value) = &action_id.value {
+                                        return Some(value.clone());
+                                    }
                                 }
                             }
                         }
@@ -560,16 +616,68 @@ async fn slack_invite(
     }
 }
 
+async fn get_slack_user_name(state: &web::Data<crate::AppState>, user_id: &str) -> String {
+    if user_id.is_empty() {
+        return String::from("Not specified");
+    }
+
+    let client = reqwest::Client::new();
+    let res = client
+        .get(format!("https://slack.com/api/users.info?user={}", user_id))
+        .header(
+            "Authorization",
+            format!("Bearer {}", state.config.slack_api_key),
+        )
+        .send()
+        .await;
+
+    match res {
+        Ok(response) => {
+            if let Ok(json) = response.json::<serde_json::Value>().await {
+                debug!("Slack user info: {json:?}");
+                if let Some(ok) = json.get("ok").and_then(|v| v.as_bool()) {
+                    if ok {
+                        if let Some(user) = json.get("user") {
+                            if let Some(profile) = user.get("profile") {
+                                if let Some(display_name) = profile.get("display_name").and_then(|v| v.as_str()) {
+                                    if !display_name.is_empty() {
+                                        return display_name.to_string();
+                                    }
+                                }
+                                // Fall back to real_name if display_name is empty
+                                if let Some(real_name) = profile.get("real_name").and_then(|v| v.as_str()) {
+                                    return real_name.to_string();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            user_id.to_string()
+        }
+        Err(e) => {
+            debug!("Error getting Slack user name for {user_id}: {e:?}");
+            user_id.to_string()
+        },
+    }
+}
+
 async fn welcome_message(
     state: &web::Data<crate::AppState>,
     f3_name: &String,
     hospital_name: &String,
     email: &String,
     cell: &String,
+    eh: &String,
+    wingman: &String,
     slack_invite_status: &str,
     mailchimp_status: &str,
 ) -> WelcomeStatus {
     let client = reqwest::Client::new();
+
+    // Get display names for EH and Wingman
+    let eh_name = get_slack_user_name(state, eh).await;
+    let wingman_name = get_slack_user_name(state, wingman).await;
 
     let welcome_msg = format!(
         r#"Hi welcome team! A new FNG just posted.  Their contact info is:
@@ -577,6 +685,8 @@ F3 Name: {f3_name}
 Hospital Name: {hospital_name}
 Email Address: {email}
 Cell Phone: {cell}
+EH: {eh_name}
+Wingman: {wingman_name}
 
 Here are the results of inviting them to slack and adding them to Mailchimp:
 {slack_invite_status}
